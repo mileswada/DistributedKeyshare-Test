@@ -140,8 +140,7 @@ double Generate_Secret(int x[], int y[], int M)
 
 			// Computing the lagrange terms
 			if (i != j) {
-				// fraction -x[j]/(x[i] - x[j]);
-                double temp = -x[j] / (x[i] - x[j]);
+                double temp = ((double)-x[j]) / (x[i] - x[j]);
 				l = l * temp;
 			}
 		}
