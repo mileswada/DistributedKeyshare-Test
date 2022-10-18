@@ -1,4 +1,5 @@
 #include <iostream>
+#include "shamir.h"
 using namespace std;
 
 // Right now only supports storing one key share at a time
@@ -14,12 +15,13 @@ class User {
             return 0;
         }
 
-        int receiveKeyShare() {
+        int receiveKeyShare(ShamirShare *share) {
+            keyShare = share;
             return 0;
         };
 
-        int retrieveKeyShare() {
-            return 0;
+        ShamirShare* retrieveKeyShare() {
+            return keyShare;
         };
 
     
@@ -27,6 +29,6 @@ class User {
     private:
         int publicKey;
         int privateKey;
-        int keyShare;
+        ShamirShare *keyShare;
 
 };
