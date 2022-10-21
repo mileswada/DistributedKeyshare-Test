@@ -13,12 +13,12 @@ class User {
             cout << "Initializing user " << name << endl;
 
             // Setup public private key pair
-            pRSA = RSA_generate_key(2048, 3, NULL, NULL);
+            // pRSA = RSA_generate_key(2048, 3, NULL, NULL);
             
-            BIGNUM *n = BN_new();
-            BIGNUM *e = BN_new();
-            BIGNUM *d = BN_new();
-            RSA_get0_key(pRSA, &n, &e, &d);
+            // BIGNUM *n = BN_new();
+            // BIGNUM *e = BN_new();
+            // BIGNUM *d = BN_new();
+            // RSA_get0_key(pRSA, &n, &e, &d);
         }
 
         int getPublicKey() {

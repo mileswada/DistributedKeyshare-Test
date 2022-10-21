@@ -4,9 +4,11 @@
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/rand.h>
-// #include "params.h"
+#include "params.h"
 #include "common.h"
 #include "shamir.h"
+#include "elgamal.h"
+
 
 void ShamirTest() {
     int rv = ERROR;
@@ -75,4 +77,30 @@ cleanup:
     for (int i = 0; i < n; i++) {
         ShamirShare_free(shares[i]);
     }
+}
+
+void ElGamalTest() {
+    printf("----- EL GAMAL TEST -----\n");
+    Params *params = Params_new();
+    BIGNUM *sk = BN_new();
+    EC_POINT *pk = EC_POINT_new(params->group);
+    ElGamal_ciphertext *c = ElGamalCiphertext_new(params);
+    BIGNUM *msg = BN_new();
+    BIGNUM *msgTest = BN_new();
+
+    BN_rand_range(sk, params->order);
+    BN_rand_range(msg, params->order);
+    EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
+
+    ElGamal_Encrypt(params, msg, pk, NULL, NULL, c);
+    ElGamal_Decrypt(params, msgTest, sk, c);
+
+    printf("msg: %s\n", BN_bn2hex(msg));
+    printf("msgTest: %s\n", BN_bn2hex(msgTest));
+}
+
+int main() {
+
+    ElGamalTest();
+    return 0;
 }

@@ -1,11 +1,10 @@
 #include <iostream>
-#include "User.cpp"
+#include "user.cpp"
 #include <bits/stdc++.h>
 #include <vector>
-#include <openssl/rsa.h>
-#include "CryptoTest.cpp"
 
 using namespace std;
+
 
 int main() {
 
@@ -53,4 +52,3 @@ int main() {
 	}
     return 0;
 }
-
