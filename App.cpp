@@ -39,66 +39,16 @@ int main() {
 	for (int i = 0; i < n; i++) {
 		// x_s[i] = shares[i]->x;
 		// y_s[i] = shares[i]->y;
-		
+		x_s[i] = BN_new();
+		y_s[i] = BN_new();
 
-		// BN_rand_range(x_s[i], params->order);
-		// BN_rand_range(y_s[i], params->order);
-		BN_copy(x_s[i], shares[i]->x);
-		BN_copy(y_s[i], shares[i]->y);
+		BN_rand_range(x_s[i], params->order);
+		BN_rand_range(y_s[i], params->order);
+		// BN_copy(x_s[i], shares[i]->x);
+		// BN_copy(y_s[i], shares[i]->y);
 		cout << BN_bn2hex(shares[i]->x) << endl;
 		cout << BN_bn2hex(x_s[i]) << endl;
     }
-
-	// ShamirShare *shares_test[n];
-	// for (int i = 0; i < n; i++) {
-	// 	shares_test[i] = ShamirShare_new();
-	// 	shares_test[i]->x = x_s[i];
-	// 	shares_test[i]->y = y_s[i];
-    // }
-	
-	// Shamir_ReconstructShares(t, n, shares_test, prime, secret_test);
-	// if (BN_cmp(secret, secret_test) == 0) {
-	// 	cout << "secret retrieved correctly";
-	// } else {
-	// 	cout << "secret incorrect" << endl;
-	// 	char *str = BN_bn2hex(secret);
-	// 	char *str_test = BN_bn2hex(secret_test);
-	// 	cout << str << endl;
-	// 	cout << str_test << endl;
-	// }
-
-	/*
-    BIGNUM *sk = BN_new();
-    EC_POINT *pk = EC_POINT_new(params->group);
-	BN_rand_range(sk, params->order);
-    EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
-	ElGamal_ciphertext *enc_x_s[n];
-	enc_x_s[0] = ElGamalCiphertext_new(params);
-	// enc_x_s[1] = ElGamalCiphertext_new(params);
-	ElGamal_Encrypt(params, x_s[0], users[0].getPublicKey(), NULL, NULL, enc_x_s[0]);
-	// ElGamal_Encrypt(params, x_s[1], users[1].getPublicKey(), NULL, NULL, enc_x_s[1]);
-
-
-	// for (int i = 0; i < n; i++) {
-	// 	enc_x_s[i] = ElGamalCiphertext_new(params);
-	// 	ElGamal_Encrypt(params, x_s[i], users[i].getPublicKey(), NULL, NULL, enc_x_s[i]);
-    // }
-    
-    BIGNUM *msg[2];
-	msg[0] = BN_new();
-	BN_rand_range(msg[0], params->order);
-    BIGNUM *msgTest = BN_new();
-
-    // ElGamal_Encrypt(params, msg, pk, NULL, NULL, c);
-    // ElGamal_Decrypt(params, msgTest, sk, c);
-
-	
-	ElGamal_Encrypt(params, x_s[0], users[0].getPublicKey(), NULL, NULL, enc_x_s[0]);
-	ElGamal_Decrypt(params, msgTest, users[0].getSecretKey(), enc_x_s[0]);
-	printf("msg: %s\n", BN_bn2hex(x_s[0]));
-    printf("msgTest: %s\n", BN_bn2hex(msgTest));
-	*/
-
 	
 	
 	ElGamal_ciphertext *enc_x_s[n];
