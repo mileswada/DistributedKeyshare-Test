@@ -1,5 +1,6 @@
 #include <iostream>
 #include "user.cpp"
+#include "common.h"
 #include <bits/stdc++.h>
 #include <vector>
 
@@ -7,7 +8,6 @@ using namespace std;
 
 
 int main() {
-
 	// Initialize Parameters
 	int t = 2;
     int n = 3;
@@ -16,39 +16,134 @@ int main() {
 	BIGNUM *secret_test =  BN_new();
 	BN_hex2bn(&prime, "CC71BAE525F36E3D3EB843232F9101BD");
     BN_rand_range(secret, prime);
-   
+
+	Params *params = Params_new(); 
+
 	// Initialize Users
 	User* users = (User*) malloc(n * sizeof(User));
 	for (int i = 0; i < n; i++) {
 		users[i] = User("user" + to_string(i));
+		cout << "User " << i << " public/private key pair generated successfully" << endl;
     }
 	
     // Generate secret and secret shares	
 	ShamirShare *shares[n];
-    ShamirShare *sharesOut[2 * t];
+    ElGamal_ciphertext *encrypted_shares[n];
+
 	for (int i = 0; i < n; i++) {
 		shares[i] = ShamirShare_new();
     }
 	Shamir_CreateShares(t, n, secret, prime, shares, NULL);
-    
-    // Send secret shares to each User
+    BIGNUM *x_s[n];
+	BIGNUM *y_s[n];
 	for (int i = 0; i < n; i++) {
-		users[i].receiveKeyShare(shares[i]);
+		// x_s[i] = shares[i]->x;
+		// y_s[i] = shares[i]->y;
+		
+
+		// BN_rand_range(x_s[i], params->order);
+		// BN_rand_range(y_s[i], params->order);
+		BN_copy(x_s[i], shares[i]->x);
+		BN_copy(y_s[i], shares[i]->y);
+		cout << BN_bn2hex(shares[i]->x) << endl;
+		cout << BN_bn2hex(x_s[i]) << endl;
     }
 
+	// ShamirShare *shares_test[n];
+	// for (int i = 0; i < n; i++) {
+	// 	shares_test[i] = ShamirShare_new();
+	// 	shares_test[i]->x = x_s[i];
+	// 	shares_test[i]->y = y_s[i];
+    // }
+	
+	// Shamir_ReconstructShares(t, n, shares_test, prime, secret_test);
+	// if (BN_cmp(secret, secret_test) == 0) {
+	// 	cout << "secret retrieved correctly";
+	// } else {
+	// 	cout << "secret incorrect" << endl;
+	// 	char *str = BN_bn2hex(secret);
+	// 	char *str_test = BN_bn2hex(secret_test);
+	// 	cout << str << endl;
+	// 	cout << str_test << endl;
+	// }
+
+	/*
+    BIGNUM *sk = BN_new();
+    EC_POINT *pk = EC_POINT_new(params->group);
+	BN_rand_range(sk, params->order);
+    EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
+	ElGamal_ciphertext *enc_x_s[n];
+	enc_x_s[0] = ElGamalCiphertext_new(params);
+	// enc_x_s[1] = ElGamalCiphertext_new(params);
+	ElGamal_Encrypt(params, x_s[0], users[0].getPublicKey(), NULL, NULL, enc_x_s[0]);
+	// ElGamal_Encrypt(params, x_s[1], users[1].getPublicKey(), NULL, NULL, enc_x_s[1]);
+
+
+	// for (int i = 0; i < n; i++) {
+	// 	enc_x_s[i] = ElGamalCiphertext_new(params);
+	// 	ElGamal_Encrypt(params, x_s[i], users[i].getPublicKey(), NULL, NULL, enc_x_s[i]);
+    // }
+    
+    BIGNUM *msg[2];
+	msg[0] = BN_new();
+	BN_rand_range(msg[0], params->order);
+    BIGNUM *msgTest = BN_new();
+
+    // ElGamal_Encrypt(params, msg, pk, NULL, NULL, c);
+    // ElGamal_Decrypt(params, msgTest, sk, c);
+
+	
+	ElGamal_Encrypt(params, x_s[0], users[0].getPublicKey(), NULL, NULL, enc_x_s[0]);
+	ElGamal_Decrypt(params, msgTest, users[0].getSecretKey(), enc_x_s[0]);
+	printf("msg: %s\n", BN_bn2hex(x_s[0]));
+    printf("msgTest: %s\n", BN_bn2hex(msgTest));
+	*/
+
+	
+	
+	ElGamal_ciphertext *enc_x_s[n];
+	ElGamal_ciphertext *enc_y_s[n];
+	// Encrypt secret shares using Elgamal and send to each User
+	for (int i = 0; i < n; i++) {
+		enc_x_s[i] = ElGamalCiphertext_new(params);
+		enc_y_s[i] = ElGamalCiphertext_new(params);
+		// cout << BN_bn2hex(x_s[i]) << endl;
+		// cout << BN_bn2hex(y_s[i]) << endl;
+		ElGamal_Encrypt(params, y_s[i], users[i].getPublicKey(), NULL, NULL, enc_y_s[i]);
+		ElGamal_Encrypt(params, x_s[i], users[i].getPublicKey(), NULL, NULL, enc_x_s[i]);
+
+		// cout << enc_x_s[i]->R << endl;
+		// cout << enc_y_s[i]->R << endl;
+	//	users[i].receiveKeyShare(enc_x_s[i], enc_y_s[i]);
+    }
+	
     // Retrieve secret shares from each User
 	ShamirShare *retrievedShares[n];
+	
 	for (int i = 0; i < n; i++) {
-		retrievedShares[i] = users[i].retrieveKeyShare();
+		BIGNUM *decryptedShare_x = BN_new();
+        BIGNUM *decryptedShare_y = BN_new();
+        ElGamal_Decrypt(params, decryptedShare_x, users[i].getSecretKey(), enc_x_s[i]);
+        ElGamal_Decrypt(params, decryptedShare_y, users[i].getSecretKey(), enc_y_s[i]);
+		retrievedShares[i] = ShamirShare_new();
+		retrievedShares[i]->x = decryptedShare_x;
+		retrievedShares[i]->y = decryptedShare_y;
+		char *decryptedShare_x_str = BN_bn2hex(decryptedShare_x);
+		char *decryptedShare_y_str = BN_bn2hex(decryptedShare_y);
+		// cout << decryptedShare_x_str << endl;
+		// cout << decryptedShare_y_str << endl;
     }
     // Reconstruct secret and verify that it's correct
 	Shamir_ReconstructShares(t, n, retrievedShares, prime, secret_test);
 	if (BN_cmp(secret, secret_test) == 0) {
 		cout << "secret retrieved correctly";
 	} else {
-		cout << "secret incorrect";
-		// cout << *secret << endl;
-		// cout << *secret_test << endl;
+		cout << "secret incorrect" << endl;
+		char *str = BN_bn2hex(secret);
+		char *str_test = BN_bn2hex(secret_test);
+		cout << str << endl;
+		cout << str_test << endl;
 	}
+	
     return 0;
 }
