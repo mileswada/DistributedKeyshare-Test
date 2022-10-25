@@ -42,10 +42,10 @@ int main() {
 		x_s[i] = BN_new();
 		y_s[i] = BN_new();
 
-		BN_rand_range(x_s[i], params->order);
-		BN_rand_range(y_s[i], params->order);
-		// BN_copy(x_s[i], shares[i]->x);
-		// BN_copy(y_s[i], shares[i]->y);
+		// BN_rand_range(x_s[i], params->order);
+		// BN_rand_range(y_s[i], params->order);
+		BN_copy(x_s[i], shares[i]->x);
+		BN_copy(y_s[i], shares[i]->y);
 		cout << BN_bn2hex(shares[i]->x) << endl;
 		cout << BN_bn2hex(x_s[i]) << endl;
     }
@@ -80,8 +80,8 @@ int main() {
 		retrievedShares[i]->y = decryptedShare_y;
 		char *decryptedShare_x_str = BN_bn2hex(decryptedShare_x);
 		char *decryptedShare_y_str = BN_bn2hex(decryptedShare_y);
-		// cout << decryptedShare_x_str << endl;
-		// cout << decryptedShare_y_str << endl;
+		cout << BN_bn2hex(decryptedShare_x_str) << endl;
+		cout << BN_bn2hex(decryptedShare_y_str) << endl;
     }
     // Reconstruct secret and verify that it's correct
 	Shamir_ReconstructShares(t, n, retrievedShares, prime, secret_test);
