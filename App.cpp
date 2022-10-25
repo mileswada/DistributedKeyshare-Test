@@ -11,13 +11,11 @@ int main() {
 	// Initialize Parameters
 	int t = 2;
     int n = 3;
-	BIGNUM *prime =  BN_new();
+	Params *params = Params_new(); 
     BIGNUM *secret =  BN_new();
 	BIGNUM *secret_test =  BN_new();
-	BN_hex2bn(&prime, "CC71BAE525F36E3D3EB843232F9101BD");
-    BN_rand_range(secret, prime);
+    BN_rand_range(secret, params->order);
 
-	Params *params = Params_new(); 
 
 	// Initialize Users
 	User* users = (User*) malloc(n * sizeof(User));
@@ -33,7 +31,7 @@ int main() {
 	for (int i = 0; i < n; i++) {
 		shares[i] = ShamirShare_new();
     }
-	Shamir_CreateShares(t, n, secret, prime, shares, NULL);
+	Shamir_CreateShares(t, n, secret, params->order, shares, NULL);
     BIGNUM *x_s[n];
 	BIGNUM *y_s[n];
 	for (int i = 0; i < n; i++) {
@@ -46,8 +44,8 @@ int main() {
 		// BN_rand_range(y_s[i], params->order);
 		BN_copy(x_s[i], shares[i]->x);
 		BN_copy(y_s[i], shares[i]->y);
-		cout << BN_bn2hex(shares[i]->x) << endl;
 		cout << BN_bn2hex(x_s[i]) << endl;
+		cout << BN_bn2hex(y_s[i]) << endl;
     }
 	
 	
@@ -61,9 +59,6 @@ int main() {
 		// cout << BN_bn2hex(y_s[i]) << endl;
 		ElGamal_Encrypt(params, y_s[i], users[i].getPublicKey(), NULL, NULL, enc_y_s[i]);
 		ElGamal_Encrypt(params, x_s[i], users[i].getPublicKey(), NULL, NULL, enc_x_s[i]);
-
-		// cout << enc_x_s[i]->R << endl;
-		// cout << enc_y_s[i]->R << endl;
 	//	users[i].receiveKeyShare(enc_x_s[i], enc_y_s[i]);
     }
 	
@@ -80,11 +75,11 @@ int main() {
 		retrievedShares[i]->y = decryptedShare_y;
 		char *decryptedShare_x_str = BN_bn2hex(decryptedShare_x);
 		char *decryptedShare_y_str = BN_bn2hex(decryptedShare_y);
-		cout << BN_bn2hex(decryptedShare_x_str) << endl;
-		cout << BN_bn2hex(decryptedShare_y_str) << endl;
+		cout << decryptedShare_x_str << endl;
+		cout << decryptedShare_y_str << endl;
     }
     // Reconstruct secret and verify that it's correct
-	Shamir_ReconstructShares(t, n, retrievedShares, prime, secret_test);
+	Shamir_ReconstructShares(t, n, retrievedShares, params->order, secret_test);
 	if (BN_cmp(secret, secret_test) == 0) {
 		cout << "secret retrieved correctly";
 	} else {
