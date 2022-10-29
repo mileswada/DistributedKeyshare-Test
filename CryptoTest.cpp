@@ -84,19 +84,30 @@ void ElGamalTest() {
     Params *params = Params_new();
     BIGNUM *sk = BN_new();
     EC_POINT *pk = EC_POINT_new(params->group);
-    ElGamal_ciphertext *c = ElGamalCiphertext_new(params);
-    BIGNUM *msg = BN_new();
-    BIGNUM *msgTest = BN_new();
+    ElGamal_ciphertext *c1 = ElGamalCiphertext_new(params);
+    ElGamal_ciphertext *c2 = ElGamalCiphertext_new(params);
+    BIGNUM *msg1 = BN_new();
+    BIGNUM *msgTest1 = BN_new();
+
+    BIGNUM *msg2 = BN_new();
+    BIGNUM *msgTest2 = BN_new();
 
     BN_rand_range(sk, params->order);
-    BN_rand_range(msg, params->order);
+    BN_rand_range(msg1, params->order);
+    BN_rand_range(msg2, params->order);
     EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
 
-    ElGamal_Encrypt(params, msg, pk, NULL, NULL, c);
-    ElGamal_Decrypt(params, msgTest, sk, c);
+    ElGamal_Encrypt(params, msg1, pk, NULL, NULL, c1);
+    ElGamal_Encrypt(params, msg2, pk, NULL, NULL, c2);
+    ElGamal_Decrypt(params, msgTest1, sk, c1);
+    ElGamal_Decrypt(params, msgTest2, sk, c2);
 
-    printf("msg: %s\n", BN_bn2hex(msg));
-    printf("msgTest: %s\n", BN_bn2hex(msgTest));
+    printf("%s\n", "message 1:");
+    printf("%s\n", BN_bn2hex(msg1));
+    printf("%s\n", BN_bn2hex(msgTest1));
+    printf("%s\n", "message 2:");
+    printf("%s\n", BN_bn2hex(msg2));
+    printf("%s\n", BN_bn2hex(msgTest2));
 }
 
 int main() {
