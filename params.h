@@ -15,8 +15,9 @@ extern "C"{
 #define AES256_IV_LEN 32
 
 #define KEY_LEN 32
-#define FIELD_ELEM_LEN 32
 #define NUM_LEAVES_HEX_STR "200000"
+#define FIELD_ELEM_LEN 32
+	
 typedef struct {
     BIGNUM *base_prime;
     BIGNUM *numLeaves;
