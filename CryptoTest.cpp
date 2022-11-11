@@ -97,19 +97,8 @@ void ElGamalTest() {
     BN_rand_range(msg2, params->order);
     EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
 
-    // BIGNUM *r = BN_new();
-    // EC_POINT *R = EC_POINT_new(params->group);
-    // BN_rand_range(r, params->order);
-    // EC_POINT_mul(params->group, R, r, NULL, NULL, params->bn_ctx);
-
     ElGamal_Encrypt(params, msg1, pk, NULL, NULL, c1);
     ElGamal_Encrypt(params, msg2, pk, NULL, NULL, c2);
-    
-    uint8_t bytes[66];
-    ElGamal_Marshal(params, bytes, c1);
-
-    uint8_t bytes2[66];
-    ElGamal_Marshal(params, bytes2, c2);
 
     ElGamal_Decrypt(params, msgTest1, sk, c1);
     ElGamal_Decrypt(params, msgTest2, sk, c2);
@@ -123,7 +112,6 @@ void ElGamalTest() {
 }
 
 int main() {
-
     ElGamalTest();
     return 0;
 }
