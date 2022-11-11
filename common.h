@@ -49,6 +49,10 @@ extern "C"{
   }\
 } while(false);
 
+inline int min (int a, int b) {
+  return (a < b) ? a : b;
+}
+
 /* Print BIGNUM to stdout. */
 #define BN_DEBUG(t, a) do { printf("%s: ", t); BN_print_fp(stdout, a); printf("\n"); } while(0);
 

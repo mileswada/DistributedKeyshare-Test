@@ -67,6 +67,7 @@ int ElGamal_Encrypt(Params *params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POI
 
     memset(msgBuf, 0, FIELD_ELEM_LEN);
     BN_bn2bin(msg, msgBuf + FIELD_ELEM_LEN - BN_num_bytes(msg));
+    printf("%s\n", BN_bn2hex(msg));
 
     c->R = EC_POINT_dup(R, params->group);
 
@@ -85,6 +86,12 @@ int ElGamal_Encrypt(Params *params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POI
     CHECK_C (EVP_EncryptUpdate(ctx, c->C, &bytesFilled, msgBuf, FIELD_ELEM_LEN));
 
 cleanup:
+    if (tmp) EC_POINT_free(tmp);
+    if (hashedTmp) EC_POINT_free(hashedTmp);
+    if (ctx) EVP_CIPHER_CTX_free(ctx);
+    if (mdctx) EVP_MD_CTX_destroy(mdctx);
+    if (r) BN_free(r);
+    if (R) EC_POINT_free(R);
     return rv;
 }
 
@@ -116,9 +123,12 @@ int ElGamal_Decrypt(Params *params, BIGNUM *msg, BIGNUM *sk, ElGamal_ciphertext 
     CHECK_C (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, hashedKeyBuf, NULL));
     CHECK_C (EVP_DecryptUpdate(ctx, msgBuf, &bytesFilled, c->C, FIELD_ELEM_LEN));
 
+    printf("%s\n", msgBuf);
     BN_bin2bn(msgBuf, FIELD_ELEM_LEN, msg);
 
 cleanup:
     if (tmp) EC_POINT_free(tmp);
     if (hashedTmp) EC_POINT_free(hashedTmp);
+    if (mdctx) EVP_MD_CTX_destroy(mdctx);
+    if (ctx) EVP_CIPHER_CTX_free(ctx);
 }
