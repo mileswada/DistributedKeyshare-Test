@@ -11,7 +11,7 @@ int main() {
 	// Initialize Parameters
 	int t = 2;
     int n = 3;
-	Params *params = Params_new(); 
+	Params params = Params_new(P256); 
     BIGNUM *secret =  BN_new();
 	BIGNUM *secret_test =  BN_new();
     BN_rand_range(secret, params->order);

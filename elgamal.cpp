@@ -10,13 +10,14 @@
 
 /* Hashed-ElGamal encryption scheme. */
 
-ElGamal_ciphertext *ElGamalCiphertext_new(Params *params) {
+ElGamal_ciphertext *ElGamalCiphertext_new(Params params) {
     int rv;
     ElGamal_ciphertext *c;
 
     CHECK_A (c = (ElGamal_ciphertext *)malloc(sizeof(ElGamal_ciphertext)));
     CHECK_A (c->R = EC_POINT_new(params->group));
     CHECK_A (c->C = (uint8_t *)malloc(FIELD_ELEM_LEN));
+    
 cleanup:
     if (rv == ERROR) {
         ElGamalCiphertext_free(c);
@@ -32,18 +33,18 @@ void ElGamalCiphertext_free(ElGamal_ciphertext *c) {
 }
 
 /* 66 bytes */
-void ElGamal_Marshal(Params *params, uint8_t *bytes, ElGamal_ciphertext *c) {
+void ElGamal_Marshal(Params params, uint8_t *bytes, ElGamal_ciphertext *c) {
     Params_pointToBytes(params, bytes, c->R);
     memcpy(bytes + 33, c->C, FIELD_ELEM_LEN);
 }
 
 /* 66 bytes */
-void ElGamal_Unmarshal(Params *params, uint8_t *bytes, ElGamal_ciphertext *c) {
+void ElGamal_Unmarshal(Params params, uint8_t *bytes, ElGamal_ciphertext *c) {
     Params_bytesToPoint(params, bytes, c->R);
     memcpy(c->C, bytes + 33, FIELD_ELEM_LEN);
 }
 
-int ElGamal_Encrypt(Params *params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POINT *R, ElGamal_ciphertext *c) {
+int ElGamal_Encrypt(Params params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POINT *R, ElGamal_ciphertext *c) {
     int rv;
     EC_POINT *tmp;
     uint8_t pointBuf[33];
@@ -59,7 +60,7 @@ int ElGamal_Encrypt(Params *params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POI
         CHECK_A (r = BN_new());
         CHECK_C (BN_rand_range(r, params->order));
         CHECK_A (R = EC_POINT_new(params->group));
-        CHECK_C (EC_POINT_mul(params->group, R, r, NULL, NULL, params->bn_ctx));
+        CHECK_C (EC_POINT_mul(params->group, R, r, NULL, NULL, params->ctx));
     }
 
     CHECK_A (tmp = EC_POINT_new(params->group));
@@ -71,7 +72,7 @@ int ElGamal_Encrypt(Params *params, BIGNUM *msg, EC_POINT *pk, BIGNUM *r, EC_POI
     c->R = EC_POINT_dup(R, params->group);
 
     // pk^r
-    CHECK_C (EC_POINT_mul(params->group, tmp, NULL, pk, r, params->bn_ctx));
+    CHECK_C (EC_POINT_mul(params->group, tmp, NULL, pk, r, params->ctx));
     // H(pk^r)
     Params_pointToBytes(params, pointBuf, tmp);
  
@@ -88,7 +89,7 @@ cleanup:
     return rv;
 }
 
-int ElGamal_Decrypt(Params *params, BIGNUM *msg, BIGNUM *sk, ElGamal_ciphertext *c) {
+int ElGamal_Decrypt(Params params, BIGNUM *msg, BIGNUM *sk, ElGamal_ciphertext *c) {
     int rv;
     EC_POINT *tmp;
     uint8_t pointBuf[33];
@@ -103,7 +104,7 @@ int ElGamal_Decrypt(Params *params, BIGNUM *msg, BIGNUM *sk, ElGamal_ciphertext 
     CHECK_A (tmp = EC_POINT_new(params->group));
     CHECK_A (hashedTmp = EC_POINT_new(params->group));
 
-    CHECK_C (EC_POINT_mul(params->group, tmp, NULL, c->R, sk, params->bn_ctx));
+    CHECK_C (EC_POINT_mul(params->group, tmp, NULL, c->R, sk, params->ctx));
     // H(R^sk)
     Params_pointToBytes(params, pointBuf, tmp);
     

@@ -18,7 +18,7 @@
  */
 
 #include <openssl/ec.h>
-#include "vrfparams.h"
+#include "params.h"
 
 #ifdef __cplusplus
 extern "C"{

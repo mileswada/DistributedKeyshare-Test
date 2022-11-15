@@ -15,13 +15,13 @@ class User {
         User(string name) {
             cout << "Initializing user " << name << endl;
             // generate pk and sk for user
-            Params *user_params = Params_new(); 
+            Params user_params = Params_new(P256); 
             params = user_params;
             sk = BN_new();
             pk = EC_POINT_new(params->group);
 
             BN_rand_range(sk, params->order);
-            EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->bn_ctx);
+            EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->ctx);
         }
 
         EC_POINT* getPublicKey() {
@@ -59,7 +59,7 @@ class User {
             return decryptedShare;
         };
 
-        Params* getParams() {
+        Params getParams() {
             return params;
         }
 
@@ -68,7 +68,7 @@ class User {
     private:
         EC_POINT *pk;
         BIGNUM *sk;
-        Params *params;
+        Params params;
         ElGamal_ciphertext *keyShare_x;
         ElGamal_ciphertext *keyShare_y;
 
