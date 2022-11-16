@@ -29,7 +29,7 @@ int main() {
   VRFProof pf = NULL;
   const uint8_t input[] = "www.example.com";
   const uint8_t input_bad[] = "www.evil.com";
- 
+  
   CHECK_A(p = Params_new (P256));
   CHECK_A (pf = VRFProof_new (p));
   CHECK_A (pk = Params_point_new(p));
@@ -38,7 +38,7 @@ int main() {
   CHECK_A (pk_bad = Params_point_new(p));
   CHECK_C (Params_rand_point (p, pk_bad));
 
-
+  
   CHECK_C (VRF_keygen (p, pk, sk));
   CHECK_C (VRF_eval (p, sk, input, sizeof input, val, pf));
   printf("%d\n", VRF_verify (p, pk, input, sizeof input, val, pf));
@@ -74,4 +74,3 @@ cleanup:
   }
   return 0;
 }
-

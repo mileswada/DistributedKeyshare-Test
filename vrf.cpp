@@ -26,7 +26,6 @@ VRFProof_new(const_Params params)
   int rv = ERROR;
   VRFProof proof = NULL;
   CHECK_A (proof = (vrf_proof *) malloc(sizeof *proof));
-
   proof->val_pt = NULL;
   proof->ddh_proof = NULL;
   CHECK_A (proof->val_pt = Params_point_new(params));
@@ -73,16 +72,12 @@ VRF_eval (const_Params params, const BIGNUM *sk,
 
   // Compute Hash(input)
   CHECK_C (Params_hash_to_point (params, hash_input, input, inputlen));
-
   // Compute Hash(input)^sk
   CHECK_C (Params_exp_base (params, proof_out->val_pt, hash_input, sk));
-
   // Get val by converting point to exponent.
   CHECK_C (Params_point_to_exponent(params, val_out, proof_out->val_pt));
-
   // pk = g^sk
   CHECK_C (Params_exp(params, pk, sk));
-
   // Prove that
   //    (g, g^sk, Hash(input), Hash(input)^sk) is a DDH tuple
   DDHStatement st;

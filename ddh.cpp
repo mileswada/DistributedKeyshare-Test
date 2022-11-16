@@ -18,7 +18,7 @@
 
 #include "common.h"
 #include "ddh.h"
-#include "vrfparams.h"
+#include "params.h"
 
 DDHProof 
 DDHProof_new (void)

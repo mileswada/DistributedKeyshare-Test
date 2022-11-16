@@ -2,6 +2,7 @@
 #include "shamir.h"
 #include "params.h"
 #include "elgamal.h"
+#include "vrf.h"
 #include <openssl/ec.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -63,6 +64,21 @@ class User {
             return params;
         }
 
+        BIGNUM *get_vrf_hash() {
+            return latest_vrf_hash;
+        }
+
+        BIGNUM* runVRF(const uint8_t *input) {
+            BIGNUM *val = BN_new();
+            VRFProof pf = VRFProof_new(params);
+            EC_POINT *pk1 = Params_point_new(params);
+            BIGNUM *sk1 = BN_new();
+            VRF_keygen (params, pk1, sk1);
+            VRF_eval (params, sk1, input, sizeof input, val, pf);
+            //printf("%d\n", VRF_verify (params, pk1, input, sizeof input, val, pf));
+            latest_vrf_proof = pf;
+            latest_vrf_hash = val;
+        }
     
 
     private:
@@ -71,5 +87,7 @@ class User {
         Params params;
         ElGamal_ciphertext *keyShare_x;
         ElGamal_ciphertext *keyShare_y;
+        VRFProof latest_vrf_proof;
+        BIGNUM *latest_vrf_hash;
 
 };

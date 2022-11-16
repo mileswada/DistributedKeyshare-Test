@@ -8,6 +8,8 @@
 #include "common.h"
 #include "shamir.h"
 #include "elgamal.h"
+#include "user.cpp"
+#include "vrf.h"
 
 
 void ShamirTest() {
@@ -111,7 +113,17 @@ void ElGamalTest() {
     // printf("%s\n", BN_bn2hex(msgTest2));
 }
 
+void UserVRFTest() {
+    printf("----- USER VRF TEST -----\n");
+
+    const uint8_t input[] = "www.example.com";
+
+    User u1 = User("User 1");
+    u1.runVRF(input);
+   
+}
+
 int main() {
-    ElGamalTest();
+    UserVRFTest();
     return 0;
 }
