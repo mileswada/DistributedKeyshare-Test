@@ -125,5 +125,7 @@ void UserVRFTest() {
 
 int main() {
     UserVRFTest();
+    ElGamalTest();
+    ShamirTest();
     return 0;
 }
