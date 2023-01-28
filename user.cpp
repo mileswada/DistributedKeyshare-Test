@@ -15,6 +15,8 @@ class User {
     public:
         User(string name) {
             cout << "Initializing user " << name << endl;
+            username = name;
+
             // generate pk and sk for user
             Params user_params = Params_new(P256); 
             params = user_params;
@@ -25,15 +27,19 @@ class User {
             EC_POINT_mul(params->group, pk, sk, NULL, NULL, params->ctx);
         }
 
-        EC_POINT* getPublicKey() {
+        string get_username() {
+            return username;
+        }
+
+        EC_POINT* get_public_key() {
             return pk;
         }
 
-        BIGNUM* getSecretKey() {
+        BIGNUM* get_secret_key() {
             return sk;
         }
 
-        int receiveKeyShare(ElGamal_ciphertext *share_x, ElGamal_ciphertext *share_y) {
+        int receive_keyShare(ElGamal_ciphertext *share_x, ElGamal_ciphertext *share_y) {
             keyShare_x = share_x;
             keyShare_y = share_y;
             /*uint8_t * stored_x = (uint8_t *) malloc(2*FIELD_ELEM_LEN);
@@ -45,7 +51,7 @@ class User {
             return 0;
         };
 
-        ShamirShare* retrieveKeyShare() { 
+        ShamirShare* retrieve_keyShare() { 
             BIGNUM *decryptedShare_x = BN_new();
             BIGNUM *decryptedShare_y = BN_new();
             ElGamal_Decrypt(params, decryptedShare_x, sk, keyShare_x);
@@ -60,7 +66,7 @@ class User {
             return decryptedShare;
         };
 
-        Params getParams() {
+        Params get_params() {
             return params;
         }
 
@@ -68,20 +74,22 @@ class User {
             return latest_vrf_hash;
         }
 
+        VRFProof get_latest_vrf_proof() {
+            return latest_vrf_proof;
+        }
+
         BIGNUM* runVRF(const uint8_t *input) {
             BIGNUM *val = BN_new();
             VRFProof pf = VRFProof_new(params);
-            EC_POINT *pk1 = Params_point_new(params);
-            BIGNUM *sk1 = BN_new();
-            VRF_keygen (params, pk1, sk1);
-            VRF_eval (params, sk1, input, sizeof input, val, pf);
-            //printf("%d\n", VRF_verify (params, pk1, input, sizeof input, val, pf));
+            VRF_keygen (params, pk, sk);
+            VRF_eval (params, sk, input, sizeof input, val, pf);
             latest_vrf_proof = pf;
             latest_vrf_hash = val;
         }
     
 
     private:
+        string username;
         EC_POINT *pk;
         BIGNUM *sk;
         Params params;
@@ -89,5 +97,4 @@ class User {
         ElGamal_ciphertext *keyShare_y;
         VRFProof latest_vrf_proof;
         BIGNUM *latest_vrf_hash;
-
 };

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "user.cpp"
+#include "directory.cpp"
 #include "common.h"
 #include <bits/stdc++.h>
 #include <vector>
@@ -11,8 +12,10 @@ int main() {
 
 	vector<User> nominating_committee;
 
-	int t = 2;
-    int n = 3;
+	int t = 2; // Threshold. Unused for now
+    int n = 10;
+
+	// Initialize parameters and secret
 	Params params = Params_new(P256); 
     BIGNUM *secret =  BN_new();
 	BIGNUM *secret_test =  BN_new();
@@ -24,8 +27,15 @@ int main() {
 		users[i] = User("user" + to_string(i));
     }
 
-	int num_rounds = 1;
+	// Initialize Key Directory
+	Directory new_dict = Directory();
+	for (int i = 0; i < n; i++) {
+		new_dict.add_public_key(users[i].get_username(), users[i].get_public_key());
+    }
+	printf("Key Directory created \n");
 
+	// Begin Rounds of Cryptographic Sortition
+	int num_rounds = 1;
 	for (int i = 0; i < num_rounds; i++) {
 
 		//Generate publicly known random seed
@@ -34,32 +44,41 @@ int main() {
 		*seed = rand() % 256;
 		nominating_committee.clear();
 
-		// Compute two
-		BIGNUM *tmp1 = BN_new();
-		BIGNUM *tmp2 = BN_new();
-		BN_one(tmp1);
-		BN_one(tmp2);
-		BIGNUM *two = BN_new();
-		BN_add(two, tmp1, tmp2);
-
+		// Compute modulus
+		BIGNUM *mod = BN_new();
+		BIGNUM *one = BN_new();
+		BN_one(one);
+		BN_set_word(mod, 5);
 		for (int j = 0; j < n; j++) {
 			users[j].runVRF(seed);
+
+			// Determine if VRF output is sufficient for nominating committee selection
 			BIGNUM *remainder = BN_new();
-			const double threshold = 0.5;
-			BN_mod(remainder, users[j].get_vrf_hash(), two, params->ctx);
-			
-			if (BN_cmp(tmp1, remainder) == 1) {
+			BN_mod(remainder, users[j].get_vrf_hash(), mod, params->ctx);
+			if (BN_cmp(one, remainder) == 1) {
 				nominating_committee.push_back(users[j]);
-				printf("User %d added", j);
+				printf("User %d selected for nominating committee. \n", j);
+			}
+		}
+
+		// Verify VRF outputs
+		for (int j = 0; j < n; j++) {
+			EC_POINT *pk = new_dict.get_public_key(users[j].get_username());
+			int result = VRF_verify (users[j].get_params(), pk, seed, sizeof seed,
+				users[j].get_vrf_hash(), users[j].get_latest_vrf_proof());
+			if (result == 1) {
+				printf("User %d followed protocol correctly\n", j);
+			} else {
+				printf("User %d did not follow protocol correctly\n", j);
 			}
 		}
 		
 	}
-
-
 	
 	return 0;
 }
+
+
 // int main() {
 // 	// Initialize Parameters
 // 	int t = 2;
